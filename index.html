@@ -45,13 +45,46 @@ $('#exec').click(function() {
 
 	var flow;
 	try {
-		flow = nools.transpile(flowScript);
+		flow = nools.compile(flowScript, { name:'fiddle' });
 		log('Flow parsed OK!');
 	} catch(e) {
 		log('Failed to parse flow.', e);
 		throw e;
 	}
+
+	var testScript = $('#test-script textarea').val();
+	parseScript(flow, testScript);
 });
+
+function parseScript(flow, testScript) {
+	var session = flow.getSession();
+
+	var fn, n = 0;
+	testScript.split('\n').forEach(function(line) {
+		line = line.trim();
+		if(line.length === 0) {
+			// ignore blank lines
+		} else if(line.charAt(line.length-1) === ':') {
+			fn = line.substring(0, line.length-1);
+			log('Switched fn to: ' + fn);
+		} else {
+			switch(fn) {
+				case 'defined':
+					window[line] = flow.getDefined(line.toLowerCase());
+					break;
+				case 'given':
+					session.assert(eval(line));
+					break;
+				case 'debug!':
+					session.match(); // TODO this returns a Promise!!
+					log('Facts:' + JSON.stringify(session.getFacts()));
+					break;
+				default: throw new Error('Unrecognized fn: ' + fn);
+			}
+		}
+		++n;
+	});
+}
 </script>
 </body>
 
