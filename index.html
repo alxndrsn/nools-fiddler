@@ -18,7 +18,7 @@
 	<div id="test-script">
 		<h1>Test script</h1>
 		<textarea></textarea>
-		<button>Run</button>
+		<button id="exec">Run</button>
 	</div>
 	<div id="log">
 		<h1>Log</h1>
@@ -27,6 +27,31 @@
 </div>
 
 <script>
+function clearLog() { $('#log textarea').val(''); }
+function log() {
+	args = Array.prototype.slice.call(arguments, 0);
+	console.log.apply(console, args);
+
+	var ta = $('#log textarea');
+	ta.val(ta.val() + '\n\n' + args.join(' '));
+	ta.scrollTop(ta[0].scrollHeight);
+}
+
+$('#exec').click(function() {
+	clearLog();
+
+	var ruleScript = $('#rules textarea').val();
+	log('Processing rule script: ' + ruleScript);
+
+	var flow;
+	try {
+		flow = nools.transpile(ruleScript);
+		log('Rules parsed OK!');
+	} catch(e) {
+		log('Failed to parse rule script.', e);
+		throw e;
+	}
+});
 </script>
 </body>
 
