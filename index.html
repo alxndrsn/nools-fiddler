@@ -11,8 +11,8 @@
 
 <body>
 <div id="content">
-	<div id="rules">
-		<h1>Rules</h1>
+	<div id="flow">
+		<h1>Flow</h1>
 		<textarea></textarea>
 	</div>
 	<div id="test-script">
@@ -40,15 +40,15 @@ function log() {
 $('#exec').click(function() {
 	clearLog();
 
-	var ruleScript = $('#rules textarea').val();
-	log('Processing rule script...');
+	var flowScript = $('#flow textarea').val();
+	log('Processing flow...');
 
 	var flow;
 	try {
-		flow = nools.transpile(ruleScript);
-		log('Rules parsed OK!');
+		flow = nools.transpile(flowScript);
+		log('Flow parsed OK!');
 	} catch(e) {
-		log('Failed to parse rule script.', e);
+		log('Failed to parse flow.', e);
 		throw e;
 	}
 });
