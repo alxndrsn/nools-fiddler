@@ -33,7 +33,7 @@ function log() {
 	console.log.apply(console, args);
 
 	var ta = $('#log textarea');
-	ta.val(ta.val() + '\n\n' + args.join(' '));
+	ta.val(ta.val() + args.join(' ') + '\n\n');
 	ta.scrollTop(ta[0].scrollHeight);
 }
 
@@ -41,7 +41,7 @@ $('#exec').click(function() {
 	clearLog();
 
 	var ruleScript = $('#rules textarea').val();
-	log('Processing rule script: ' + ruleScript);
+	log('Processing rule script...');
 
 	var flow;
 	try {
