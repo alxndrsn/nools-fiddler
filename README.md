@@ -57,3 +57,60 @@
 	    ]
 	  }
 	]
+
+## Pregnancy followups
+
+### Flow
+
+	define Pregnancy {
+	  start : '',
+	  constructor : function() {
+	    this.start = Nootils.date();
+	  }
+	}
+
+	define Checkup {
+	  due : '',
+	  constructor : function(due) {
+	    this.due = due;
+	  }
+	}
+
+	rule TrimesterCheckup {
+	  when {
+	    p : Pregnancy
+	  }
+	  then {
+	    emit('checkup', new Checkup(Nootils.datePlus(p.start, 90)))
+	  }
+	}
+
+### Test script
+
+	[
+	  {
+	    "type":"defined",
+	    "values": [ "Pregnancy", "Checkup" ]
+	  },
+	  {
+	    "type":"fast_forward",
+	    "days":1
+	  },
+	  {
+	    "type":"date",
+	    "value":0
+	  },
+	  {
+	    "type":"given",
+	    "values": [
+	       "new Pregnancy()"
+	    ]
+	  },
+	  {
+	    "type":"expect_emits",
+	    "event": "checkup",
+	    "values": [
+	      [ { "due":"1970-04-01" } ]
+	    ]
+	  }
+	]
