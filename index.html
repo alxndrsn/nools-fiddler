@@ -127,6 +127,12 @@ function executeTest(flow, testScript) {
 	function process() {
 		for(cmd = testScript.shift(); typeof cmd !== 'undefined'; cmd = testScript.shift()) {
 			switch(cmd.type) {
+				case 'date':
+					Nootils_currentDate = new Date(cmd.value).valueOf();
+					break;
+				case 'fast_forward':
+					Nootils_currentDate = Nootils.datePlus(new Date(Nootils_currentDate), cmd.days);
+					break;
 				case 'defined':
 					cmd.values.forEach(function(typeName) {
 						window[typeName] = flow.getDefined(typeName.toLowerCase());
