@@ -33,12 +33,39 @@ function log() {
 	console.log.apply(console, args);
 
 	var ta = $('#log textarea');
-	ta.val(ta.val() + args.join(' ') + '\n\n');
+	ta.val(ta.val() + '–' + args.join(' ') + '\n');
 	ta.scrollTop(ta[0].scrollHeight);
 }
 
+function deepEquals(a, b) {
+	var i, k;
+
+	if(typeof a !== typeof b) return false;
+	if(typeof a === 'boolean') return a === b;
+	if(typeof a === 'number') return a === b;
+	if(typeof a === 'string') return a === b;
+	if(Array.isArray(a)) {
+		if(!Array.isArray(b)) return false;
+		if(a.length !== b.length) return false;
+
+		for(i=a.length-1; i>=0; --i) {
+			if(!deepEquals(a[i], b[i])) return false;
+		}
+		return true;
+	}
+	for(k in a) {
+		if(a.hasOwnProperty(k)) {
+			if(!deepEquals(a[k], b[k])) return false;
+		}
+	}
+	return true;
+}
+
 $('#exec').click(function() {
+	$('#exec').prop('disabled', true);
+
 	clearLog();
+	nools.deleteFlows();
 
 	var flowScript = $('#flow textarea').val();
 	log('Processing flow...');
@@ -59,31 +86,82 @@ $('#exec').click(function() {
 function parseScript(flow, testScript) {
 	var session = flow.getSession();
 
-	var fn, n = 0;
-	testScript.split('\n').forEach(function(line) {
-		line = line.trim();
-		if(line.length === 0) {
-			// ignore blank lines
-		} else if(line.charAt(line.length-1) === ':') {
-			fn = line.substring(0, line.length-1);
-			log('Switched fn to: ' + fn);
-		} else {
-			switch(fn) {
-				case 'defined':
-					window[line] = flow.getDefined(line.toLowerCase());
-					break;
-				case 'given':
-					session.assert(eval(line));
-					break;
-				case 'debug!':
-					session.match(); // TODO this returns a Promise!!
-					log('Facts:' + JSON.stringify(session.getFacts()));
-					break;
-				default: throw new Error('Unrecognized fn: ' + fn);
+	var fn, n = -1, expected;
+	var line, lines = testScript.split('\n');
+
+	function process() {
+		for(line = lines.shift(); typeof line === 'string'; line = lines.shift()) {
+			++n;
+			//log('Processing line ' + n + ' [' + line + ']...');
+			line = line.trim();
+			if(line.length === 0) {
+				// ignore blank lines
+				log('Ignoring blank line...');
+			} else if(line.charAt(line.length-1) === ':') {
+				if(fn === 'expect' && expected.length) {
+					session.match()
+						.then(function() {
+							log('Getting facts...');
+							var facts = session.getFacts();
+							log('Facts: ' + JSON.stringify(facts));
+							log('Expected: ' + JSON.stringify(expected));
+							if(deepEquals(facts, expected)) {
+								log('Facts looked ok');
+							} else {
+								log('Bad facts!!');
+								throw new Error('Bad facts!'); // FIXME this does not show up anywhere, and I don't know why
+							}
+						})
+						.then(process)
+						.catch(function(err) {
+							log(err);
+						});
+					return;
+				}
+
+				if(line === 'debug:') {
+					session.match()
+						.then(function() {
+							log('Facts:' + JSON.stringify(session.getFacts()));
+						})
+						.then(process)
+						.catch(function(err) {
+							log(err);
+						});
+					return;
+				} else if(line === 'end:') {
+					return;
+				}
+
+				fn = line.substring(0, line.length-1);
+				expected = [];
+				log('Switched fn to: ' + fn);
+			} else {
+				switch(fn) {
+					case 'defined':
+						window[line] = flow.getDefined(line.toLowerCase());
+						break;
+					case 'given':
+						session.assert(eval(line));
+						break;
+					case 'expect':
+						log('Adding line to expected list...');
+						expected.push(JSON.parse(line));
+						break;
+					default:
+						log('Don\'t know how to process line for fn "' + fn + '"', line);
+						throw new Error('Unrecognized fn: ' + fn); // FIXME this does not show up anywhere, and I don't know why
+				}
 			}
 		}
-		++n;
-	});
+		log('Finished.', line, n, lines);
+	}
+
+	try {
+		process();
+	} catch(err) {
+		log(err);
+	}
 }
 </script>
 </body>
