@@ -49,7 +49,7 @@
 	    ]
 	  },
 	  {
-	    "type":"expect",
+	    "type":"expect_facts",
 	    "values": [
 	      { "text": "hello goodbye" },
 	      { "text": "hello world goodbye" },
@@ -57,4 +57,3 @@
 	    ]
 	  }
 	]
-
