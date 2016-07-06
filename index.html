@@ -43,9 +43,16 @@ function log() {
 	ta.scrollTop(ta[0].scrollHeight);
 }
 
+function dateString(d) {
+	return d.toISOString().split('T')[0];
+}
+
 function deepEquals(a, b) {
 	var i, k;
 
+	if(a instanceof Date && b instanceof Date) return a.toDateString() === b.toDateString();
+	if(a instanceof Date && typeof b === 'string') return dateString(a) === b;
+	if(typeof a === 'string' && b instanceof Date) return a === dateString(b);
 	if(typeof a !== typeof b) return false;
 	if(typeof a === 'boolean') return a === b;
 	if(typeof a === 'number') return a === b;
@@ -67,8 +74,20 @@ function deepEquals(a, b) {
 	return true;
 }
 
+var Nootils_currentDate;
+var Nootils = {
+	date: function() { return new Date(Nootils_currentDate); },
+	datePlus: function(d, days) {
+		var newDate = new Date(d.valueOf());
+		newDate.setDate(d.getDate() + days);
+		return newDate;
+	},
+};
+
 $('#exec').click(function() {
 	clearLog();
+	nools.deleteFlows();
+	Nootils_currentDate = 0;
 
 	var flowScript = $('#flow textarea').val();
 	log('Processing flow...');
