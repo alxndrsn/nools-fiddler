@@ -4,7 +4,7 @@
 	<script src="lib/jquery-3.0.0.js"></script>
 	<script src="lib/nools.js"></script>
 	<style>
-		#content > div { width:300px; float:left; margin:20px; }
+		#content > div { width:30%; float:left; margin:20px; }
 		textarea { width:100%; height:70%; }
 	</style>
 </head>
@@ -62,10 +62,7 @@ function deepEquals(a, b) {
 }
 
 $('#exec').click(function() {
-	$('#exec').prop('disabled', true);
-
 	clearLog();
-	nools.deleteFlows();
 
 	var flowScript = $('#flow textarea').val();
 	log('Processing flow...');
@@ -79,28 +76,46 @@ $('#exec').click(function() {
 		throw e;
 	}
 
-	var testScript = $('#test-script textarea').val();
-	parseScript(flow, testScript);
+	var testScript;
+	log('Prasing test script...');
+	try {
+		testScript = JSON.parse($('#test-script textarea').val());
+	} catch(e) {
+		log('Failed to parse test script.', e);
+		throw e;
+	}
+
+	log('Executing test...');
+	try {
+		executeTest(flow, testScript);
+	} catch(e) {
+		log('Failed to execite test.', e);
+		throw e;
+	}
 });
 
-function parseScript(flow, testScript) {
+function executeTest(flow, testScript) {
 	var session = flow.getSession();
 
-	var fn, n = -1, expected;
-	var line, lines = testScript.split('\n');
+	var fn, n = -1, cmd;
 
 	function process() {
-		for(line = lines.shift(); typeof line === 'string'; line = lines.shift()) {
-			++n;
-			//log('Processing line ' + n + ' [' + line + ']...');
-			line = line.trim();
-			if(line.length === 0) {
-				// ignore blank lines
-				log('Ignoring blank line...');
-			} else if(line.charAt(line.length-1) === ':') {
-				if(fn === 'expect' && expected.length) {
+		for(cmd = testScript.shift(); typeof cmd !== 'undefined'; cmd = testScript.shift()) {
+			switch(cmd.type) {
+				case 'defined':
+					cmd.values.forEach(function(typeName) {
+						window[typeName] = flow.getDefined(typeName.toLowerCase());
+					});
+					break;
+				case 'given':
+					cmd.values.forEach(function(given) {
+						session.assert(eval(given));
+					});
+					break;
+				case 'expect':
 					session.match()
 						.then(function() {
+							var expected = cmd.values;
 							log('Getting facts...');
 							var facts = session.getFacts();
 							log('Facts: ' + JSON.stringify(facts));
@@ -117,41 +132,7 @@ function parseScript(flow, testScript) {
 							log(err);
 						});
 					return;
-				}
-
-				if(line === 'debug:') {
-					session.match()
-						.then(function() {
-							log('Facts:' + JSON.stringify(session.getFacts()));
-						})
-						.then(process)
-						.catch(function(err) {
-							log(err);
-						});
-					return;
-				} else if(line === 'end:') {
-					return;
-				}
-
-				fn = line.substring(0, line.length-1);
-				expected = [];
-				log('Switched fn to: ' + fn);
-			} else {
-				switch(fn) {
-					case 'defined':
-						window[line] = flow.getDefined(line.toLowerCase());
-						break;
-					case 'given':
-						session.assert(eval(line));
-						break;
-					case 'expect':
-						log('Adding line to expected list...');
-						expected.push(JSON.parse(line));
-						break;
-					default:
-						log('Don\'t know how to process line for fn "' + fn + '"', line);
-						throw new Error('Unrecognized fn: ' + fn); // FIXME this does not show up anywhere, and I don't know why
-				}
+				default: throw new Error('Unrecognized command type: ' + cmd.type);
 			}
 		}
 		log('Finished.', line, n, lines);
