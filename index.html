@@ -50,6 +50,9 @@ function dateString(d) {
 function deepEquals(a, b) {
 	var i, k;
 
+	if(typeof a === 'string' && a.indexOf('doc:') === 0) a = Nootils_docs[a.substring(4)];
+	if(typeof b === 'string' && b.indexOf('doc:') === 0) b = Nootils_docs[b.substring(4)];
+
 	if(a instanceof Date && b instanceof Date) return a.toDateString() === b.toDateString();
 	if(a instanceof Date && typeof b === 'string') return dateString(a) === b;
 	if(typeof a === 'string' && b instanceof Date) return a === dateString(b);
@@ -74,6 +77,460 @@ function deepEquals(a, b) {
 	return true;
 }
 
+var Nootils_schedules = [
+  {
+    "name": "assessment-treatment",
+    "events": [
+      {
+        "id": "treatment-followup-1",
+        "days": 2,
+        "start": 2,
+        "end": 2,
+        "type": "treatment",
+        "title": [
+          {
+            "content": "{{contact.name}} treatment follow up",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "assessment-treatment-referral",
+    "events": [
+      {
+        "id": "treatment-referral-followup-1",
+        "days": 1,
+        "start": 1,
+        "end": 3,
+        "type": "clinic",
+        "title": [
+          {
+            "content": "{{contact.name}} treat and refer follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "Referral made",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "assessment-referral",
+    "events": [
+      {
+        "id": "referral-followup-1",
+        "days": 1,
+        "start": 1,
+        "end": 3,
+        "type": "clinic",
+        "title": [
+          {
+            "content": "{{contact.name}} referral follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "Referral made",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family-survey",
+    "events": [
+      {
+        "id": "survey-1",
+        "days": 182,
+        "start": 7,
+        "end": 28,
+        "type": "survey",
+        "title": [
+          {
+            "content": "{{contact.name}} survey",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "add-children",
+    "events": [
+      {
+        "id": "child-1",
+        "days": 0,
+        "start": 1,
+        "end": 28,
+        "type": "child",
+        "title": [
+          {
+            "content": "{{contact.name}} child registration",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "Child registration for {{contact.name}}",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "add-pregnancy",
+    "events": [
+      {
+        "id": "add-pregnancy",
+        "days": 0,
+        "start": 1,
+        "end": 28,
+        "type": "pregnancy-4",
+        "title": [
+          {
+            "content": "{{contact.name}} new pregnancy",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "Register pregnancy for {{contact.name}}",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pregnancy-high-risk",
+    "events": [
+      {
+        "id": "pregnancy-high-risk-1",
+        "days": 30,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-1",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-2",
+        "days": 60,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-1",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-3",
+        "days": 90,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-1",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-4",
+        "days": 120,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-2",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-5",
+        "days": 150,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-2",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-6",
+        "days": 180,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-3",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-7",
+        "days": 210,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-3",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-8",
+        "days": 240,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-4",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-high-risk-9",
+        "days": 270,
+        "start": 26,
+        "end": 3,
+        "type": "pregnancy-4",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "High risk",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pregnancy-healthy",
+    "events": [
+      {
+        "id": "pregnancy-1",
+        "days": 217,
+        "start": 133,
+        "end": 6,
+        "type": "pregnancy-1",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-2",
+        "days": 245,
+        "start": 21,
+        "end": 6,
+        "type": "pregnancy-2",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-3",
+        "days": 266,
+        "start": 14,
+        "end": 6,
+        "type": "pregnancy-3",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ]
+      },
+      {
+        "id": "pregnancy-4",
+        "days": 280,
+        "start": 7,
+        "end": 14,
+        "type": "pregnancy-4",
+        "title": [
+          {
+            "content": "{{contact.name}} pregnancy follow up",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "register-pregnancy",
+    "events": [
+      {
+        "id": "register-pregnancy",
+        "days": 0,
+        "start": 1,
+        "end": 28,
+        "type": "pregnancy-1",
+        "title": [
+          {
+            "content": "{{contact.name}} register pregnancy",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "postnatal-healthy",
+    "events": [
+      {
+        "id": "postnatal-1",
+        "days": 5,
+        "start": 2,
+        "end": 14,
+        "type": "mother-child",
+        "title": [
+          {
+            "content": "{{contact.name}} postnatal follow up",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "postnatal-acute-conditions",
+    "events": [
+      {
+        "id": "postnatal-acute-conditions-1",
+        "days": 1,
+        "start": 1,
+        "end": 14,
+        "type": "mother-child",
+        "title": [
+          {
+            "content": "{{contact.name}} postnatal follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "Danger signs",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pregnancy-acute-conditions",
+    "events": [
+      {
+        "id": "pregnancy-acute-conditions-1",
+        "days": 2,
+        "start": 2,
+        "end": 2,
+        "type": "clinic",
+        "title": [
+          {
+            "content": "{{contact.name}} referral follow up",
+            "locale": "en"
+          }
+        ],
+        "description": [
+          {
+            "content": "Danger signs",
+            "locale": "en"
+          }
+        ]
+      }
+    ]
+  }
+];
+var Nootils_docs = {
+};
+var Nootils_schedules = [{"name":"assessment-treatment","events":[{"id":"treatment-followup-1","days":2,"start":2,"end":2,"type":"treatment","title":[{"content":"{{contact.name}} treatment follow up","locale":"en"}]}]},{"name":"assessment-treatment-referral","events":[{"id":"treatment-referral-followup-1","days":1,"start":1,"end":3,"type":"clinic","title":[{"content":"{{contact.name}} treat and refer follow up","locale":"en"}],"description":[{"content":"Referral made","locale":"en"}]}]},{"name":"assessment-referral","events":[{"id":"referral-followup-1","days":1,"start":1,"end":3,"type":"clinic","title":[{"content":"{{contact.name}} referral follow up","locale":"en"}],"description":[{"content":"Referral made","locale":"en"}]}]},{"name":"family-survey","events":[{"id":"survey-1","days":182,"start":7,"end":28,"type":"survey","title":[{"content":"{{contact.name}} survey","locale":"en"}]}]},{"name":"add-children","events":[{"id":"child-1","days":0,"start":1,"end":28,"type":"child","title":[{"content":"{{contact.name}} child registration","locale":"en"}],"description":[{"content":"Child registration for {{contact.name}}","locale":"en"}]}]},{"name":"add-pregnancy","events":[{"id":"add-pregnancy","days":0,"start":1,"end":28,"type":"pregnancy-4","title":[{"content":"{{contact.name}} new pregnancy","locale":"en"}],"description":[{"content":"Register pregnancy for {{contact.name}}","locale":"en"}]}]},{"name":"pregnancy-high-risk","events":[{"id":"pregnancy-high-risk-1","days":30,"start":26,"end":3,"type":"pregnancy-1","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-2","days":60,"start":26,"end":3,"type":"pregnancy-1","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-3","days":90,"start":26,"end":3,"type":"pregnancy-1","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-4","days":120,"start":26,"end":3,"type":"pregnancy-2","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-5","days":150,"start":26,"end":3,"type":"pregnancy-2","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-6","days":180,"start":26,"end":3,"type":"pregnancy-3","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-7","days":210,"start":26,"end":3,"type":"pregnancy-3","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-8","days":240,"start":26,"end":3,"type":"pregnancy-4","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]},{"id":"pregnancy-high-risk-9","days":270,"start":26,"end":3,"type":"pregnancy-4","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}],"description":[{"content":"High risk","locale":"en"}]}]},{"name":"pregnancy-healthy","events":[{"id":"pregnancy-1","days":217,"start":133,"end":6,"type":"pregnancy-1","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}]},{"id":"pregnancy-2","days":245,"start":21,"end":6,"type":"pregnancy-2","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}]},{"id":"pregnancy-3","days":266,"start":14,"end":6,"type":"pregnancy-3","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}]},{"id":"pregnancy-4","days":280,"start":7,"end":14,"type":"pregnancy-4","title":[{"content":"{{contact.name}} pregnancy follow up","locale":"en"}]}]},{"name":"register-pregnancy","events":[{"id":"register-pregnancy","days":0,"start":1,"end":28,"type":"pregnancy-1","title":[{"content":"{{contact.name}} register pregnancy","locale":"en"}]}]},{"name":"postnatal-healthy","events":[{"id":"postnatal-1","days":5,"start":2,"end":14,"type":"mother-child","title":[{"content":"{{contact.name}} postnatal follow up","locale":"en"}]}]},{"name":"postnatal-acute-conditions","events":[{"id":"postnatal-acute-conditions-1","days":1,"start":1,"end":14,"type":"mother-child","title":[{"content":"{{contact.name}} postnatal follow up","locale":"en"}],"description":[{"content":"Danger signs","locale":"en"}]}]},{"name":"pregnancy-acute-conditions","events":[{"id":"pregnancy-acute-conditions-1","days":2,"start":2,"end":2,"type":"clinic","title":[{"content":"{{contact.name}} referral follow up","locale":"en"}],"description":[{"content":"Danger signs","locale":"en"}]}]}];
 var Nootils_currentDate;
 var Nootils = {
 	date: function() { return new Date(Nootils_currentDate); },
@@ -82,12 +539,91 @@ var Nootils = {
 		newDate.setDate(d.getDate() + days);
 		return newDate;
 	},
+	log: function() {
+		log.apply('[flow]', Array.prototype.slice.call(arguments, 0));
+	},
+
+	doc: function(id) {
+		log('Found doc: ' + Nootils_docs[id]);
+		return Nootils_docs[id];
+	},
+
+	// ported to support medic-webapp
+          isTimely: function(date, event) {
+            var due = Nootils.date(date);
+            var start = this.addDate(null, event.start);
+            var end = this.addDate(null, (event.end + 1) * -1);
+            return due.getTime() < start.getTime() && due.getTime() > end.getTime();
+          },
+          addDate: function(date, days) {
+            var result;
+            if (date) {
+              result = Nootils.date(date.getTime());
+            } else {
+              result = Nootils.date();
+            }
+            result.setDate(result.getDate() + days);
+            return result;
+          },
+          getLmpDate: function(doc) {
+            var weeks = doc.fields.last_menstrual_period || NO_LMP_DATE_MODIFIER;
+            return this.addDate(Nootils.date(doc.reported_date), weeks * -7);
+          },
+          getSchedule: function(name) {
+	    var returnTask;
+	    Nootils_schedules.forEach(function(t) {
+	      if(t.name === name) returnTask = t;
+	    });
+	    return returnTask;
+          },
+          getMostRecentTimestamp: function(reports, form) {
+            var report = this.getMostRecentReport(reports, form);
+            return report && report.reported_date;
+          },
+          getMostRecentReport: function(reports, form) {
+            var result = null;
+            reports.forEach(function(report) {
+              if (report.form === form &&
+                 (!result || report.reported_date > result.reported_date)) {
+                result = report;
+              }
+            });
+            return result;
+          },
+          isFormSubmittedInWindow: function(reports, form, start, end, count) {
+            var result = false;
+            reports.forEach(function(report) {
+              if (!result && report.form === form) {
+                if (report.reported_date >= start && report.reported_date <= end) {
+                  if (!count ||
+                     (count && report.fields && report.fields.follow_up_count > count)) {
+                    result = true;
+                  }
+                }
+              }
+            });
+            return result;
+          },
+          isFirstReportNewer: function(firstReport, secondReport) {
+            if (firstReport && firstReport.reported_date) {
+              if (secondReport && secondReport.reported_date) {
+                return firstReport.reported_date > secondReport.reported_date;
+              }
+              return true;
+            }
+            return null;
+          },
+          isDateValid: function(date) {
+            return !isNaN(date.getTime());
+          },
+          MS_IN_DAY: 24*60*60*1000 // 1 day in ms
 };
 
 $('#exec').click(function() {
 	clearLog();
 	nools.deleteFlows();
 	Nootils_currentDate = 0;
+	Nootils_docs = {};
 
 	var flowScript = $('#flow textarea').val();
 	log('Processing flow...');
@@ -102,8 +638,9 @@ $('#exec').click(function() {
 	}
 
 	var testScript;
-	log('Prasing test script...');
+	log('Parsing test script...');
 	try {
+		//testScript = eval('(function() { return ' + $('#test-script textarea').val() + ' }())');
 		testScript = JSON.parse($('#test-script textarea').val());
 	} catch(e) {
 		log('Failed to parse test script.', e);
@@ -118,6 +655,16 @@ $('#exec').click(function() {
 		throw e;
 	}
 });
+
+function traverse(keys, element) {
+	var keys = keys.slice(0);
+	var key = keys.shift();
+	if(!key || typeof element === 'undefined') return element;
+	if(key === '*') {
+		return element.map(function(e) { return traverse(keys, e); });
+	}
+	return traverse(keys, element[key]);
+}
 
 function executeTest(flow, testScript) {
 	var session = flow.getSession();
@@ -140,13 +687,25 @@ function executeTest(flow, testScript) {
 					break;
 				case 'given':
 					cmd.values.forEach(function(given) {
-						session.assert(eval(given));
+						var obj = eval(given);
+						Nootils_docs[obj.contact._id] = obj.contact;
+						obj.reports.forEach(function(r) { Nootils_docs[r._id] = r; });
+						session.assert(obj);
+
+log('Nootils_docs is now: ' + Nootils_docs);
+log('Nootils_docs keys are now: ' + Object.keys(Nootils_docs));
 					});
 					break;
 				case 'expect_emits':
 					var emits = [];
+					var keys = cmd.key ? cmd.key.split('.') : null;
 					session.on(cmd.event, function() {
 						var args = Array.prototype.slice.call(arguments, 0);
+
+						log('Subkey: ' + cmd.key);
+
+						if(keys) args[0] = traverse(keys, args[0]);
+
 						emits.push(args);
 					});
 					session.match()
@@ -154,6 +713,7 @@ function executeTest(flow, testScript) {
 							var expected = cmd.values;
 							log('Emits: ' + JSON.stringify(emits));
 							log('Expected: ' + JSON.stringify(expected));
+
 							if(deepEquals(emits, expected)) {
 								log('Emits looked ok');
 							} else {
